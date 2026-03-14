@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="">
   <head>
+    <style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+  body {
+    /* 背景图，不要加 opacity！否则整个页面都变透明 */
+    background: url("/images/bg.jpeg") no-repeat center center fixed;
+    background-size: cover;
+  }
+  #app {
+    /* 让容器在背景图之上 */
+    position: relative;
+    z-index: 1;
+  }
+</style>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
