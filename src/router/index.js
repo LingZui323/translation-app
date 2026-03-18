@@ -1,35 +1,44 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
-
-// 导入页面组件（删除TicketPricePage，新增MenuRecognitionPage）
-import LoginPage from '../views/LoginPage.vue'
-import TranslationPage from '../views/TranslationPage.vue'
-import HotSpotsRank from '../views/HotSpotsRank.vue'
-import RecommendSpotsPage from '../views/RecommendSpotsPage.vue'
-import ImageTranslatePage from '../views/ImageTranslatePage.vue'
-import TravelPlanPage from '../views/TravelPlanPage.vue'
-import MenuRecognitionPage from '../views/MenuRecognitionPage.vue' // 新增
-
-// 登录拦截守卫
-const requireAuth = (to, from, next) => {
-  const isLogin = localStorage.getItem('translation_username')
-  isLogin ? next() : next('/login')
-}
+import { createRouter, createWebHistory } from 'vue-router'
+// 导入所有页面组件
+import TranslationPage from '@/views/TranslationPage'
+import TextVoiceTranslation from '@/views/TextVoiceTranslation' // 新增
+import SpotQuery from '@/views/SpotQuery'
+import HistoryRecord from '@/views/HistoryRecord'
+import LoginPage from '@/views/LoginPage'
 
 const routes = [
-  { path: '/', redirect: '/translation' },
-  { path: '/login', name: 'Login', component: LoginPage },
-  { path: '/translation', name: 'Translation', component: TranslationPage, beforeEnter: requireAuth },
-  { path: '/hot-spots', name: 'HotSpots', component: HotSpotsRank, beforeEnter: requireAuth },
-  // 替换：删除原ticket-price路由，新增menu-recognition路由
-  { path: '/menu-recognition', name: 'MenuRecognition', component: MenuRecognitionPage, beforeEnter: requireAuth },
-  { path: '/recommend-spots', name: 'RecommendSpots', component: RecommendSpotsPage, beforeEnter: requireAuth },
-  { path: '/image-translate', name: 'ImageTranslate', component: ImageTranslatePage, beforeEnter: requireAuth },
-  { path: '/travel-plan', name: 'TravelPlan', component: TravelPlanPage, beforeEnter: requireAuth }
+  { path: '/', redirect: '/translation' }, // 默认跳转到图片翻译主页
+  { path: '/login', name: 'LoginPage', component: LoginPage }, // 登录页（无需登录）
+  { path: '/translation', name: 'TranslationPage', component: TranslationPage, meta: { requiresAuth: true } }, // 图片翻译主页
+  { path: '/text-voice-translation', name: 'TextVoiceTranslation', component: TextVoiceTranslation, meta: { requiresAuth: true } }, // 文字/语音翻译
+  { path: '/spot-query', name: 'SpotQuery', component: SpotQuery, meta: { requiresAuth: true } }, // 景点查询
+  { path: '/history-record', name: 'HistoryRecord', component: HistoryRecord, meta: { requiresAuth: true } } // 历史记录
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes
+})
+
+// 全局登录拦截守卫
+router.beforeEach((to, from, next) => {
+  // 获取登录状态
+  const isLogin = localStorage.getItem('translation_username')
+  // 判断是否需要登录
+  const requiresAuth = to.meta.requiresAuth
+  
+  // 未登录访问需要登录的页面 → 跳登录页
+  if (requiresAuth && !isLogin) {
+    next('/login')
+  } 
+  // 已登录访问登录页 → 跳主页
+  else if (to.path === '/login' && isLogin) {
+    next('/translation')
+  } 
+  // 其他情况正常访问
+  else {
+    next()
+  }
 })
 
 export default router
